@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./web-speech.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WebSpeechComponent implements OnInit , AfterViewInit{
+export class WebSpeechComponent implements OnInit, AfterViewInit {
   languages: string[] = languages;
   currentLanguage: string = defaultLanguage;
   totalTranscript?: string;
@@ -26,26 +26,27 @@ export class WebSpeechComponent implements OnInit , AfterViewInit{
   listening$?: Observable<boolean>;
   errorMessage$?: Observable<string>;
   defaultError$ = new Subject<string | undefined>();
+  check = false;
 
   constructor(
     private speechRecognizer: SpeechRecognizerService,
     private actionContext: ActionContext,
-    private synthServive :PythonService,
-    private router:Router,
+    private synthServive: PythonService,
+    private router: Router,
     private speechSynthesizer: SpeechSynthesizerService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const webSpeechReady = this.speechRecognizer.initialize(this.currentLanguage);
     if (webSpeechReady) {
       this.initRecognition();
-    }else {
+    } else {
       this.errorMessage$ = of('Your Browser is not supported. Please try Google Chrome.');
     }
-   // this.start();
+    // this.start();
   }
 
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.callInstruction();
   }
   start(): void {
@@ -127,38 +128,97 @@ export class WebSpeechComponent implements OnInit , AfterViewInit{
     }
   }
 
-  callInstruction(){
-    this.synthServive.callInstruction().subscribe(res=>{
-      if(res){
+  callInstruction() {
+    this.synthServive.callInstruction().subscribe(res => {
+      if (res) {
         // this.start();
+        this.synthServive.init();
+        this.synthServive.start();
         this.callMessage()
       }
     })
-    
+
   }
-  callMessage(){
-    this.synthServive.start();
-    this.speechSynthesizer.checkPromptedText(this.synthServive.text)
-    setTimeout(() => {
-    this.synthServive.stop();
-    this.callMessageConfirm();
-    }, 3000);    
+  callMessage() {
+    this.synthServive.textBehaviour.subscribe(res => {
+      if (res) {
+        console.log('web', res)
+        const text = res.toLowerCase();
+        this.checkPromptedText(text)
+        setTimeout(() => {
+          if (!this.check) {
+            this.callMessageConfirm();
+          }
+        }, 5000);
+      }
+    })
+
   }
-  callMessageConfirm(){
-    this.synthServive.start();
-    setTimeout(() => {
-    this.synthServive.stop();
-    const value = this.speechSynthesizer.checkPromptedTextConfirm(this.synthServive.text)
-    if(value){
-     this.route      
-    }else{
-      this.speechSynthesizer.checkPromptedText(this.synthServive.text)
-      this.callMessage();
+
+  checkPromptedText(text: string) {
+    const prompt = text.toLowerCase();
+    let value = false;
+    switch (prompt) {
+      case 'slow':
+        this.speechSynthesizer.initSynthesisonSelect(1)
+        //this.synthServive.textBehaviour.unsubscribe();
+        this.synthServive.stop();
+        //this.speakQuestionNext()
+        break;
+      case 'medium':
+        this.speechSynthesizer.initSynthesisonSelect(2)
+        //this.synthServive.textBehaviour.unsubscribe();
+        this.synthServive.stop();
+        //this.speakQuestionNext()
+        break;
+      case 'fast':
+        this.speechSynthesizer.initSynthesisonSelect(3)
+        //this.synthServive.textBehaviour.unsubscribe();
+        this.synthServive.stop();
+        //this.speakQuestionNext()
+        break;
+      case 'confirm':
+        // this.synthServive.textBehaviour.unsubscribe();
+        this.synthServive.stop();
+        this.route()
+        //this.speakQuestionNext()
+        break;
+      case 'confirm.':
+        // this.synthServive.textBehaviour.unsubscribe();
+        this.synthServive.stop();
+        this.route()
+        //this.speakQuestionNext()
+        break;
+
     }
-    }, 3000);    
-  } 
-  
-  route(){
+  }
+  callMessageConfirm() {
+    this.check = true;
+    this.synthServive.callConfirm().subscribe(res => {
+      if (res) {
+        this.synthServive.start();
+        this.callMessage();
+        // const value = this.speechSynthesizer.checkPromptedTextConfirm(this.synthServive.tempWords)
+        // setTimeout(() => {
+        //   if(value){
+        //    this.synthServive.stop();
+        //    this.route      
+        //   }else{
+        //     this.synthServive.stop();
+        //     //this.speechSynthesizer.checkPromptedText(this.synthServive.text)
+        //     //this.callMessage();
+        //   }
+        // }, 10000); 
+      }
+    })
+
+  }
+
+  route() {
     this.router.navigate(['/question']);
+  }
+
+  ngOnDestroy() {
+    this.synthServive.textBehaviour.unsubscribe()
   }
 }

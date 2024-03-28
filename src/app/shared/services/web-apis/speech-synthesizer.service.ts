@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SpeechSynthesizerService {
   speechSynthesizer!: SpeechSynthesisUtterance;
+
+  essayBehaviour = new BehaviorSubject('')
 
   constructor() {
     this.initSynthesis();
@@ -23,7 +26,7 @@ export class SpeechSynthesizerService {
     speechSynthesis.speak(this.speechSynthesizer);
   }
   initSynthesisonSelect(speed: any): void {
-    const data = ['slow', 'medium', 'fast'];
+    const data = ['','slow', 'medium', 'fast'];
     this.speechSynthesizer = new SpeechSynthesisUtterance("This example speaks a string with the speaking rate set to " + data[speed]);
     this.speechSynthesizer.volume = 10;
     this.speechSynthesizer.rate = speed;
@@ -48,15 +51,15 @@ export class SpeechSynthesizerService {
     switch (prompt) {
       case 'slow':
         this.initSynthesisonSelect(1)
-        this.speakQuestionNext()
+        //this.speakQuestionNext()
         break;
       case 'medium':
         this.initSynthesisonSelect(2)
-        this.speakQuestionNext()
+        //this.speakQuestionNext()
         break;
       case 'fast':
         this.initSynthesisonSelect(3)
-        this.speakQuestionNext()
+        //this.speakQuestionNext()
         break;
       case 'confirm':
         value = true;
@@ -73,5 +76,18 @@ export class SpeechSynthesizerService {
         break;
     }
     return value;
+  }
+
+  speakEssay(message: string, language: string): void {
+    this.speechSynthesizer.lang = language;
+    this.speechSynthesizer.text = message;
+    speechSynthesis.speak(this.speechSynthesizer);
+    this.essayBehaviour = new BehaviorSubject('')
+    this.speechSynthesizer.onend = (event) => {
+      console.log(
+        `Utterance has finished being spoken after ${event.elapsedTime} seconds.`,
+      );
+    };
+   
   }
 }

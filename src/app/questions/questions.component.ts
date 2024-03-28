@@ -10,6 +10,16 @@ import { SpeechSynthesizerService } from '../shared/services/web-apis/speech-syn
 export class QuestionsComponent implements OnInit {
 
   essayValue: any;
+  speechSynthesizerEssay!: SpeechSynthesisUtterance;
+
+  
+
+  initSynthesis(): void {
+    this.speechSynthesizerEssay = new SpeechSynthesisUtterance();
+    this.speechSynthesizerEssay.volume = 1;
+    this.speechSynthesizerEssay.rate = 1;
+    this.speechSynthesizerEssay.pitch = 0.2;
+  }
   constructor(private synthServive :PythonService,private speechSynthesizer: SpeechSynthesizerService
     ) { }
 
@@ -17,6 +27,7 @@ export class QuestionsComponent implements OnInit {
   }
 
   ngAfterViewInit(){
+    this.initSynthesis();
     this.callInstruction();
   }
 
@@ -33,10 +44,46 @@ export class QuestionsComponent implements OnInit {
     this.synthServive.start();
     setTimeout(() => {
     this.synthServive.stop();
-    this.essayValue = this.synthServive.text;
+    this.essayValue = this.synthServive.text.trim();
     this.speechSynthesizer.speakEssayPromptEn();
-    this.speechSynthesizer.speak(this.essayValue.toString(),'en-US');
+    this.speakEssay(this.essayValue.toString(),'en-US');
     // this.speechSynthesizer.speakQuestionNext();
-    }, 30000);    
+    this.callMessageConfirm();
+    }, 20000);    
+  }
+  callMessageConfirm(){
+    // this.speechSynthesizer.essayBehaviour.subscribe(res=>{
+    //   if(res){
+    //     console.log('web',res)
+    //     setTimeout(() => {
+    //         this.callMessageConfirm();
+          
+    //     }, 5000);  
+    //   }
+    // })
+    
+  }
+  
+  speakEssay(message: string, language: string): void {
+    this.speechSynthesizerEssay.lang = language;
+    this.speechSynthesizerEssay.text = message;
+    speechSynthesis.speak(this.speechSynthesizerEssay);
+    this.speechSynthesizerEssay.onend = (event) => {
+      this.callForTamilText();
+      console.log(
+        `Utterance from component ${event.elapsedTime} seconds.`,
+      );
+    };
+   
+  }
+
+  callForTamilText(){
+    const data = this.essayValue.replace(/ /g, '');
+    console.log(data)
+    this.synthServive.callTamilText(this.essayValue).subscribe((res)=>{
+      if(res){
+        console.log(res)
+      }
+    })
   }
 }
