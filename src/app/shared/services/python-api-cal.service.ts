@@ -15,7 +15,8 @@ export class PythonService {
   isStoppedSpeechRecog = false;
   public text = '';
   tempWords:any;
-  textBehaviour = new BehaviorSubject('')
+  textBehaviour = new BehaviorSubject('');
+  textObservable = this.textBehaviour.asObservable();
 
 
 
@@ -81,32 +82,17 @@ export class PythonService {
   callAnswerEssay(){
     return this.http.get('http://127.0.0.1:5000/answer')
   }
-
+  
   callTamilText(data: any){
     const params = new HttpParams().set('type', data);
     return this.http.get('http://127.0.0.1:5000/synthesize_data',{params:params})
-
   }
-// async callTamilText(data: any){
-//     const options = {
-//         method: 'POST',
-//         uri: 'http://127.0.0.1:5000/synthesize_data',
-//         body: data,
-//         json: true
-//     };
-//     try {
-//         const parsedBody = await request(options);
-//         console.log(parsedBody);
-//         // You can do something with
-//         // returned data
-//         let result;
-//         console.log("Sum of Array from Python: ", result);
-//         return result;
-//       } catch (err) {
-//         console.log(err);
-//         return err;
 
-//     }
-// }
-   
+  callImage(){
+    return this.http.get('http://127.0.0.1:5000/api/image')
+  }
+
+  callTamilQuestion(){
+    return this.http.get('http://127.0.0.1:5000//api/essay')
+  }   
 }

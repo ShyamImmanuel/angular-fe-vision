@@ -24,6 +24,9 @@ export class SpeechSynthesizerService {
     this.speechSynthesizer.lang = language;
     this.speechSynthesizer.text = message;
     speechSynthesis.speak(this.speechSynthesizer);
+    this.speechSynthesizer.addEventListener("end", (event) => {
+      console.log(event);
+    });
   }
   initSynthesisonSelect(speed: any): void {
     const data = ['','slow', 'medium', 'fast'];

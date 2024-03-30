@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { merge, Observable, of, Subject } from 'rxjs';
+import { merge, Observable, of, Subject, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { defaultLanguage, languages } from '../shared/model/languages';
 import { SpeechError } from '../shared/model/speech-error';
@@ -27,6 +27,8 @@ export class WebSpeechComponent implements OnInit, AfterViewInit {
   errorMessage$?: Observable<string>;
   defaultError$ = new Subject<string | undefined>();
   check = false;
+  subscription: Subscription = new Subscription;
+
 
   constructor(
     private speechRecognizer: SpeechRecognizerService,
@@ -140,7 +142,7 @@ export class WebSpeechComponent implements OnInit, AfterViewInit {
 
   }
   callMessage() {
-    this.synthServive.textBehaviour.subscribe(res => {
+    this.subscription = this.synthServive.textBehaviour.subscribe(res => {
       if (res) {
         console.log('web', res)
         const text = res.toLowerCase();
@@ -219,6 +221,6 @@ export class WebSpeechComponent implements OnInit, AfterViewInit {
   }
 
   ngOnDestroy() {
-    this.synthServive.textBehaviour.unsubscribe()
+    this.subscription.unsubscribe()
   }
 }

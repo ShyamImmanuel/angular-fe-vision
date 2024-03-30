@@ -9,11 +9,15 @@ import { WebSpeechModule } from './web-speech/web-speech.module';
 import { HttpClientModule } from '@angular/common/http';
 import { QuestionsComponent } from './questions/questions.component';
 import { FormsModule } from '@angular/forms';
+import { ImageQuestionComponent } from './image-question/image-question.component';
+import { TamilQuestionComponent } from './tamil-question/tamil-question.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    QuestionsComponent
+    QuestionsComponent,
+    ImageQuestionComponent,
+    TamilQuestionComponent
   ],
   imports: [
     BrowserModule,

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { PythonService } from '../shared/services/python-api-cal.service';
 import { SpeechSynthesizerService } from '../shared/services/web-apis/speech-synthesizer.service';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'wsa-questions',
@@ -11,6 +13,8 @@ export class QuestionsComponent implements OnInit {
 
   essayValue: any;
   speechSynthesizerEssay!: SpeechSynthesisUtterance;
+  subscription: Subscription = new Subscription;
+
 
   
 
@@ -20,10 +24,14 @@ export class QuestionsComponent implements OnInit {
     this.speechSynthesizerEssay.rate = 1;
     this.speechSynthesizerEssay.pitch = 0.2;
   }
-  constructor(private synthServive :PythonService,private speechSynthesizer: SpeechSynthesizerService
+  constructor(private synthServive :PythonService,private speechSynthesizer: SpeechSynthesizerService,
+    private router: Router,
+
     ) { }
+  speakLang = true;
 
   ngOnInit(): void {
+    this.speakLang = true;
   }
 
   ngAfterViewInit(){
@@ -69,10 +77,12 @@ export class QuestionsComponent implements OnInit {
     this.speechSynthesizerEssay.text = message;
     speechSynthesis.speak(this.speechSynthesizerEssay);
     this.speechSynthesizerEssay.onend = (event) => {
-      this.callForTamilText();
-      console.log(
-        `Utterance from component ${event.elapsedTime} seconds.`,
-      );
+      if(this.speakLang){
+        this.callForTamilText();
+      }
+      if(!this.speakLang){
+        this.callNext()
+      }
     };
    
   }
@@ -80,10 +90,54 @@ export class QuestionsComponent implements OnInit {
   callForTamilText(){
     const data = this.essayValue.replace(/ /g, '');
     console.log(data)
+    this.speakLang = true;
     this.synthServive.callTamilText(this.essayValue).subscribe((res)=>{
       if(res){
         console.log(res)
+        this.speakLang = false;
+        this.speechSynthesizerEssay.lang = 'en-US';
+        this.speechSynthesizerEssay.text = 'Say Confirm to proceed to next Question';
+        speechSynthesis.speak(this.speechSynthesizerEssay);
       }
     })
+  }
+
+  callNext(){
+    this.synthServive.start();
+    setTimeout(() => {
+      this.subscription =  this.synthServive.textBehaviour.subscribe(res => {
+        if (res) {
+          console.log('web', res)
+          const text = res.toLowerCase();
+          this.checkPromptedText(text)
+        }
+      })
+    }, 5000);    
+  }
+
+  checkPromptedText(text: string) {
+    const prompt = text.toLowerCase();
+    let value = false;
+    switch (prompt) {
+      case 'confirm':
+        // this.synthServive.textBehaviour.unsubscribe();
+        this.synthServive.stop();
+        this.route()
+        //this.speakQuestionNext()
+        break;
+      case 'confirm.':
+        // this.synthServive.textBehaviour.unsubscribe();
+        this.synthServive.stop();
+        this.route()
+        //this.speakQuestionNext()
+        break;
+
+    }
+  }
+  route() {
+    this.router.navigate(['/image']);
+  }
+  ngOnDestroy() {
+    this.subscription.unsubscribe()
   }
 }
