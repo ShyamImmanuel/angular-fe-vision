@@ -16,7 +16,7 @@ export class ImageQuestionComponent implements OnInit {
   subscription: Subscription = new Subscription;
   questions = "Which Country's PC Shipments records are represented in the bar chart"; 
   //  Option One : 'INDIA',Option two :'RUSSIA',Option three'CHINA', Option Four:  'USA'";
-  options = ['INDIA','RUSSIA','CHINA','USA'];
+  options = ['INDIA.','RUSSIA.','CHINA.','USA.'];
 
   initSynthesis(): void {
     this.speechSynthesizerEssay = new SpeechSynthesisUtterance();
@@ -29,7 +29,7 @@ export class ImageQuestionComponent implements OnInit {
 
   ) { }
   speakLang = true;
-
+  selectedOption = 0;
   ngOnInit(): void {
     this.speakLang = true;
   }
@@ -48,7 +48,9 @@ export class ImageQuestionComponent implements OnInit {
   callInstruction() {
     this.synthServive.callImage().subscribe(res => {
       if (res) {
-        this.callOptionsQuestions()
+        setTimeout(() => {
+          this.callOptionsQuestions()
+        }, 3000);
         //this.callMessage();
       }
     })
@@ -56,9 +58,13 @@ export class ImageQuestionComponent implements OnInit {
   }
 
  async callOptionsQuestions(){
+     await this.speak('You wil provide answer for the questions o chart','en-US');
+     await this.speak('Your question is as follows','en-US');
      await this.speak(this.questions,'en-US');
+     await this.speak('Your options are','en-US');
+     
       for(let i=0; i<this.options?.length; i++){
-        const text = "Option  " + this.options[i];
+        const text = this.options[i];
         await this.speak(text,'en-US');
     }
     this.callMessage();
@@ -78,14 +84,28 @@ export class ImageQuestionComponent implements OnInit {
     setTimeout(() => {
       this.synthServive.stop();
       this.option = this.synthServive.text.trim();
-      this.speechSynthesizer.speakEssayPromptEn();
-      this.speakEssay(this.option.toString(), 'en-US');
+      //this.speechSynthesizer.speakEssayPromptEn();
+      //this.checkOptionMatch(this.option.toString());
+      this.speakLang = true;
+      this.speakEssay("The Anwer You have Provided is  " +this.option.toString(), 'en-US');
       // this.speechSynthesizer.speakQuestionNext();
-    }, 10000);
+    }, 5000);
   }
 
+  checkOptionMatch(option: string){
+    const value = option.trim();
+    let index =0;
+    // for(let i = 0; i<this.options?.length;i++){
+    //   if(this.options[i].toLowerCase().includes(value.toLowerCase())){
+    //     index = i+1;
+    //   }
+    // }
+    this.selectedOption = 2;
+    console.log(this.selectedOption);
+  }
 
   speakEssay(message: string, language: string): void {
+    this.initSynthesis();
     this.speechSynthesizerEssay.lang = language;
     this.speechSynthesizerEssay.text = message;
     speechSynthesis.speak(this.speechSynthesizerEssay);
@@ -102,9 +122,11 @@ export class ImageQuestionComponent implements OnInit {
 
   callForConfirm() {
     this.speakLang = false;
+    this.synthServive.text='';
     this.speechSynthesizerEssay.lang = 'en-US';
     this.speechSynthesizerEssay.text = 'Say Confirm to proceed to next Question';
     speechSynthesis.speak(this.speechSynthesizerEssay);
+    
   }
 
 
@@ -149,7 +171,7 @@ export class ImageQuestionComponent implements OnInit {
     this.router.navigate(['/question']);
   }
   routeToNext() {
-    console.log('NEXT')
+    this.router.navigate(['/essay']);
   }
   ngOnDestroy() {
     this.subscription.unsubscribe()

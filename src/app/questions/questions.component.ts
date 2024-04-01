@@ -16,7 +16,7 @@ export class QuestionsComponent implements OnInit {
   subscription: Subscription = new Subscription;
 
 
-  
+
 
   initSynthesis(): void {
     this.speechSynthesizerEssay = new SpeechSynthesisUtterance();
@@ -24,95 +24,124 @@ export class QuestionsComponent implements OnInit {
     this.speechSynthesizerEssay.rate = 1;
     this.speechSynthesizerEssay.pitch = 0.2;
   }
-  constructor(private synthServive :PythonService,private speechSynthesizer: SpeechSynthesizerService,
+  constructor(private synthServive: PythonService, private speechSynthesizer: SpeechSynthesizerService,
     private router: Router,
 
-    ) { }
-  speakLang = true;
+  ) { }
+  speakLang = false;
+  repeat = false;
+  speakNext = false;
+  count = 0;
 
   ngOnInit(): void {
-    this.speakLang = true;
+    this.speakLang = false;
+    this.repeat = false;
+    this.speakNext = false;
   }
 
-  ngAfterViewInit(){
+  ngAfterViewInit() {
     this.initSynthesis();
     this.callInstruction();
   }
 
-  callInstruction(){
-    this.synthServive.callEssay().subscribe(res=>{
-      if(res){
-        this.synthServive.init()
+  callInstruction() {
+    this.synthServive.callEssay().subscribe(res => {
+      if (res) {
+        this.synthServive.init();
+        // this.speechSynthesizerEssay.lang = 'en-US';
+        // this.speechSynthesizerEssay.text = 'Please Provide your answer';
+        // speechSynthesis.speak(this.speechSynthesizerEssay);
         this.callMessage();
       }
     })
-    
+
   }
-  callMessage(){
+  callMessage() {
+    this.repeat = false;
+    this.speakLang = false;
+    this.speakNext = false;    
     this.synthServive.start();
     setTimeout(() => {
-    this.synthServive.stop();
-    this.essayValue = this.synthServive.text.trim();
-    this.speechSynthesizer.speakEssayPromptEn();
-    this.speakEssay(this.essayValue.toString(),'en-US');
-    // this.speechSynthesizer.speakQuestionNext();
-    this.callMessageConfirm();
-    }, 20000);    
+      this.synthServive.stop();
+      this.essayValue = this.synthServive.text.trim();
+      //this.speechSynthesizer.speakEssayPromptEn();
+      this.speakLang = true;
+      this.speakEssay(this.essayValue.toString(), 'en-US');
+    }, 10000);
   }
-  callMessageConfirm(){
+  callMessageConfirm() {
     // this.speechSynthesizer.essayBehaviour.subscribe(res=>{
     //   if(res){
     //     console.log('web',res)
     //     setTimeout(() => {
     //         this.callMessageConfirm();
-          
+
     //     }, 5000);  
     //   }
     // })
-    
+
   }
-  
+
   speakEssay(message: string, language: string): void {
+    this.synthServive.stop();
     this.speechSynthesizerEssay.lang = language;
     this.speechSynthesizerEssay.text = message;
     speechSynthesis.speak(this.speechSynthesizerEssay);
     this.speechSynthesizerEssay.onend = (event) => {
-      if(this.speakLang){
+      if (this.speakLang) {
         this.callForTamilText();
       }
-      if(!this.speakLang){
+      if (this.speakNext) {
         this.callNext()
       }
-    };
-   
-  }
-
-  callForTamilText(){
-    const data = this.essayValue.replace(/ /g, '');
-    console.log(data)
-    this.speakLang = true;
-    this.synthServive.callTamilText(this.essayValue).subscribe((res)=>{
-      if(res){
-        console.log(res)
-        this.speakLang = false;
-        this.speechSynthesizerEssay.lang = 'en-US';
-        this.speechSynthesizerEssay.text = 'Say Confirm to proceed to next Question';
-        speechSynthesis.speak(this.speechSynthesizerEssay);
+      if(this.repeat){
+        setTimeout(() => {
+          this.synthServive.text ='';
+          this.callMessage();
+        }, 3000);  
       }
-    })
+      
+    };
+
   }
 
-  callNext(){
+  callForTamilText() {
+    // const data = this.essayValue.replace(/ /g, '');
+    // console.log(data)
+    // this.speakLang = true;
+    // this.synthServive.callTamilText(this.essayValue).subscribe((res) => {
+    //   if (res) {
+    //     console.log(res)
+        this.speakLang = false;
+        this.repeat = false;
+        this.speakNext = true;
+        this.speechSynthesizerEssay.lang = 'en-US';
+        this.speechSynthesizerEssay.text = 'Say Confirm to proceed or Edit to Change your answer';
+        this.synthServive.stop();
+        speechSynthesis.speak(this.speechSynthesizerEssay);
+        
+    //   }
+    // })
+  }
+
+  callNext() {
     this.synthServive.start();
+    this.speakLang = false;
+    this.repeat = false;
+    this.speakNext = false;
+    this.count = 0;
     setTimeout(() => {
-      this.subscription =  this.synthServive.textBehaviour.subscribe(res => {
+      this.subscription = this.synthServive.textBehaviour.subscribe(res => {
         if (res) {
           console.log('web', res)
           const text = res.toLowerCase();
+          if(text === 'edit.' || text === 'edit'){
+            this.count = 1;
+          }
           this.checkPromptedText(text)
         }
       })
-    }, 5000);    
+    }, 3000);
   }
 
   checkPromptedText(text: string) {
@@ -120,19 +149,49 @@ export class QuestionsComponent implements OnInit {
     let value = false;
     switch (prompt) {
       case 'confirm':
-        // this.synthServive.textBehaviour.unsubscribe();
+        this.repeat = false;
+        this.speakLang = false;
+        this.speakNext = false;
         this.synthServive.stop();
         this.route()
-        //this.speakQuestionNext()
         break;
       case 'confirm.':
-        // this.synthServive.textBehaviour.unsubscribe();
+        this.repeat = false;
+        this.speakLang = false;
+        this.speakNext = false;
         this.synthServive.stop();
         this.route()
-        //this.speakQuestionNext()
         break;
+      case 'edit.':
+        this.synthServive.stop();
+        this.repeat = true;
+        this.speakLang = false;
+        this.speakNext = false;
+        this.essayValue = '';
+        this.speakAnswer();
+        break;
+      // case 'edit':
+      //   this.repeat = true;
+      //   this.synthServive.stop();
+      //   this.synthServive.init()
+      //   this.essayValue = '';
+      //   this.speechSynthesizerEssay.lang = 'en-US';
+      //   this.speechSynthesizerEssay.text = 'Please Provide your answer';
+      //   speechSynthesis.speak(this.speechSynthesizerEssay);
+      //   break;
 
     }
+  }
+
+  speakAnswer()
+  {
+    if(this.count < 2){
+      this.synthServive.stop();
+      this.speechSynthesizerEssay.lang = 'en-US';
+      this.speechSynthesizerEssay.text = 'Please Provide your answer';
+      speechSynthesis.speak(this.speechSynthesizerEssay);
+   }
+    //this.count = 1;
   }
   route() {
     this.router.navigate(['/image']);

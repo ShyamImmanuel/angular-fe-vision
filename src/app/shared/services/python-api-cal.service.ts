@@ -85,14 +85,17 @@ export class PythonService {
   
   callTamilText(data: any){
     const params = new HttpParams().set('type', data);
-    return this.http.get('http://127.0.0.1:5000/synthesize_data',{params:params})
+    return this.http.get('http://127.0.0.1:5000/api/synthesize_data',{params:params})
   }
-
+  callTamilTextf(data: any){
+    const params = new HttpParams().set('type', data);
+    return this.http.get('http://127.0.0.1:5000/api/synthesize_dataf',{params:params})
+  }
   callImage(){
     return this.http.get('http://127.0.0.1:5000/api/image')
   }
 
   callTamilQuestion(){
-    return this.http.get('http://127.0.0.1:5000//api/essay')
+    return this.http.get('http://127.0.0.1:5000/api/tessay')
   }   
 }
