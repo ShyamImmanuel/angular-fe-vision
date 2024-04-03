@@ -1,17 +1,17 @@
 <div class="question-container">
     <div class="image-container">
-        <img src="../../assets/sample0.png" alt="Flowers in Chania" style="width: 500px;height: 500px;">
+        <img src="../../assets/tourist.PNG" alt="Flowers in Chania" style="width: 500px;height: 500px;">
     </div>
     <div class="container-fluid">
         <div class="modal-header">
-            <h3>Q. Which Country's PC Shipments records are represented in the bar chart?</h3>
+            <h3>Q. What percentage of Indian tourist went to either USA or UK?</h3>
         </div>
         <div class="modal-body">
             <div class="quiz" id="quiz" data-toggle="buttons">
-                <label><input type="radio" name="q_answer" value="1">INDIA.</label>
-                <label ><input type="radio" name="q_answer" value="2">RUSSIA.</label>
-                <label ><input type="radio" name="q_answer" value="3">CHINA.</label>
-                <label ><input type="radio" name="q_answer" value="4" >USA.</label>
+                <label><input type="radio" name="q_answer" value="1" [checked]='selectedOption === 1'>40%.</label>
+                <label ><input type="radio" name="q_answer" value="2" [checked]='selectedOption === 2'>50%.</label>
+                <label ><input type="radio" name="q_answer" value="3" [checked]='selectedOption === 3'>70%.</label>
+                <label ><input type="radio" name="q_answer" value="4" [checked]='selectedOption === 4'>80%.</label>
             </div>
         </div>
     </div>

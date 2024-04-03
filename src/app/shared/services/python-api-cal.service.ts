@@ -37,7 +37,12 @@ export class PythonService {
       console.log(transcript);
     });
   }
-
+  setOnResult(callback: (result: string) => void): void {
+    this.recognition.onresult = (event:any) => {
+      const transcript = event.results[0][0].transcript;
+      callback(transcript);
+    };
+  }
   start() {
     this.isStoppedSpeechRecog = false;
     this.recognition.start();

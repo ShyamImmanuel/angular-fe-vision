@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { PythonService } from '../shared/services/python-api-cal.service';
 import { SpeechSynthesizerService } from '../shared/services/web-apis/speech-synthesizer.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { SpeechRecognitionService } from '../shared/services/seepc-service';
 
 @Component({
   selector: 'wsa-questions',
@@ -14,7 +15,7 @@ export class QuestionsComponent implements OnInit {
   essayValue: any;
   speechSynthesizerEssay!: SpeechSynthesisUtterance;
   subscription: Subscription = new Subscription;
-
+  checkArr=['confirm.','confirm','edit','edit.']
 
 
 
@@ -24,8 +25,8 @@ export class QuestionsComponent implements OnInit {
     this.speechSynthesizerEssay.rate = 1;
     this.speechSynthesizerEssay.pitch = 0.2;
   }
-  constructor(private synthServive: PythonService, private speechSynthesizer: SpeechSynthesizerService,
-    private router: Router,
+  constructor(private synthServive: PythonService, private speechSynthesizer: SpeechSynthesizerService,private spec:SpeechRecognitionService,
+    private router: Router,private ngZone: NgZone
 
   ) { }
   speakLang = false;
@@ -41,45 +42,37 @@ export class QuestionsComponent implements OnInit {
 
   ngAfterViewInit() {
     this.initSynthesis();
-    this.callInstruction();
+    setTimeout(() => {
+      this.callInstruction();
+    }, 3000);
   }
 
   callInstruction() {
     this.synthServive.callEssay().subscribe(res => {
       if (res) {
         this.synthServive.init();
-        // this.speechSynthesizerEssay.lang = 'en-US';
-        // this.speechSynthesizerEssay.text = 'Please Provide your answer';
-        // speechSynthesis.speak(this.speechSynthesizerEssay);
         this.callMessage();
       }
     })
 
   }
-  callMessage() {
+  async callMessage() {
     this.repeat = false;
     this.speakLang = false;
     this.speakNext = false;    
     this.synthServive.start();
-    setTimeout(() => {
+    setTimeout(async () => {
       this.synthServive.stop();
       this.essayValue = this.synthServive.text.trim();
-      //this.speechSynthesizer.speakEssayPromptEn();
       this.speakLang = true;
-      this.speakEssay(this.essayValue.toString(), 'en-US');
+      await this.speak(this.essayValue.toString(), 'en-US')
+      await this.speak('Say Confirm to proceed or Edit to Change your answer','en-US')
+      this.callNext();
     }, 10000);
+    
   }
-  callMessageConfirm() {
-    // this.speechSynthesizer.essayBehaviour.subscribe(res=>{
-    //   if(res){
-    //     console.log('web',res)
-    //     setTimeout(() => {
-    //         this.callMessageConfirm();
-
-    //     }, 5000);  
-    //   }
-    // })
-
+  async callMessageConfirm() {
+ 
   }
 
   speakEssay(message: string, language: string): void {
@@ -125,23 +118,20 @@ export class QuestionsComponent implements OnInit {
   }
 
   callNext() {
-    this.synthServive.start();
+    this.spec.startRecognition();
     this.speakLang = false;
     this.repeat = false;
     this.speakNext = false;
     this.count = 0;
-    setTimeout(() => {
-      this.subscription = this.synthServive.textBehaviour.subscribe(res => {
-        if (res) {
-          console.log('web', res)
-          const text = res.toLowerCase();
-          if(text === 'edit.' || text === 'edit'){
-            this.count = 1;
-          }
-          this.checkPromptedText(text)
-        }
-      })
-    }, 3000);
+    // setTimeout(() => {
+      this.spec.setOnResult((result) => {
+       console.log('result',result);
+       if(this.checkArr.includes(result.toLowerCase())){
+        this.spec.stopRecognition();
+        this.checkPromptedText(result.trim());
+       }
+      });
+    // }, 3000);
   }
 
   checkPromptedText(text: string) {
@@ -152,14 +142,16 @@ export class QuestionsComponent implements OnInit {
         this.repeat = false;
         this.speakLang = false;
         this.speakNext = false;
-        this.synthServive.stop();
+        this.spec.stopRecognition();
+        this.speak('Moving to next question','en-US');
         this.route()
         break;
       case 'confirm.':
         this.repeat = false;
         this.speakLang = false;
         this.speakNext = false;
-        this.synthServive.stop();
+        this.spec.stopRecognition();
+        this.speak('Moving to next question','en-US');
         this.route()
         break;
       case 'edit.':
@@ -168,7 +160,8 @@ export class QuestionsComponent implements OnInit {
         this.speakLang = false;
         this.speakNext = false;
         this.essayValue = '';
-        this.speakAnswer();
+        this.spec.stopRecognition();
+        this.speakAnswer()
         break;
       // case 'edit':
       //   this.repeat = true;
@@ -183,18 +176,39 @@ export class QuestionsComponent implements OnInit {
     }
   }
 
-  speakAnswer()
+  async speakAnswer()
   {
-    if(this.count < 2){
       this.synthServive.stop();
-      this.speechSynthesizerEssay.lang = 'en-US';
-      this.speechSynthesizerEssay.text = 'Please Provide your answer';
-      speechSynthesis.speak(this.speechSynthesizerEssay);
-   }
-    //this.count = 1;
+      this.synthServive.text ='';
+      // this.speechSynthesizerEssay.lang = 'en-US';
+      // this.speechSynthesizerEssay.text = 'Please Provide your answer';
+      // speechSynthesis.speak(this.speechSynthesizerEssay);
+      await this.speak('Please Provide your answer','en-US');
+      await this.callMessage();
   }
+
+ async  speak(message: string ,language:string) {
+   return new Promise((resolve, reject) => {
+     const utterThis = new SpeechSynthesisUtterance();
+     utterThis.lang = language;
+     utterThis.text = message;
+     speechSynthesis.speak(utterThis);
+     utterThis.onend = resolve;
+   });
+ }
   route() {
-    this.router.navigate(['/image']);
+    setTimeout(async () => {
+      this.question()
+    }, 5000);
+  }
+  navigateTo(url: string): void {
+    this.ngZone.run(() => {
+      this.router.navigateByUrl(url);
+    });
+  }
+   question(){
+   // this.router.navigate(['/image']);
+   this.navigateTo('/image');
   }
   ngOnDestroy() {
     this.subscription.unsubscribe()

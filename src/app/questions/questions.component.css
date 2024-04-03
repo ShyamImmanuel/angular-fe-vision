@@ -92,6 +92,11 @@ body{
     padding-top: 130px;
     padding-left: 65px;
     padding-right: 65px;
+    p{
+        font-style:arial;
+        color: #ab346d;
+        font-size: x-large;
+    }
 }
 textarea {
     width: 100%;
@@ -100,7 +105,9 @@ textarea {
     box-sizing: border-box;
     border: 2px solid #ccc;
     border-radius: 4px;
-    background-color: #f8f8f8;
+    background-color: #c8e3d3;
     font-size: 16px;
     resize: none;
+    font-style:arial;
+    color: #ab346d;
 }

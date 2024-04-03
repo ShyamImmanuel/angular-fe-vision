@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PythonService } from '../shared/services/python-api-cal.service';
@@ -14,9 +14,9 @@ export class ImageQuestionComponent implements OnInit {
   option: any;
   speechSynthesizerEssay!: SpeechSynthesisUtterance;
   subscription: Subscription = new Subscription;
-  questions = "Which Country's PC Shipments records are represented in the bar chart"; 
+  questions = "What percentage of Indian tourist went to either USA or UK"; 
   //  Option One : 'INDIA',Option two :'RUSSIA',Option three'CHINA', Option Four:  'USA'";
-  options = ['INDIA.','RUSSIA.','CHINA.','USA.'];
+  options = ['40%','50%','70%','80%'];
 
   initSynthesis(): void {
     this.speechSynthesizerEssay = new SpeechSynthesisUtterance();
@@ -24,7 +24,7 @@ export class ImageQuestionComponent implements OnInit {
     this.speechSynthesizerEssay.rate = 1;
     this.speechSynthesizerEssay.pitch = 0.2;
   }
-  constructor(private synthServive: PythonService, private speechSynthesizer: SpeechSynthesizerService,
+  constructor(private synthServive: PythonService, private speechSynthesizer: SpeechSynthesizerService,private ngZone: NgZone,
     private router: Router,
 
   ) { }
@@ -43,6 +43,7 @@ export class ImageQuestionComponent implements OnInit {
     this.initSynthesis();
     this.callInstruction();
     this.synthServive.init()
+    //this.callOptionsQuestions();
   }
 
   callInstruction() {
@@ -58,7 +59,7 @@ export class ImageQuestionComponent implements OnInit {
   }
 
  async callOptionsQuestions(){
-     await this.speak('You wil provide answer for the questions o chart','en-US');
+     await this.speak('You wil Now Answer Questions Related to Chart','en-US');
      await this.speak('Your question is as follows','en-US');
      await this.speak(this.questions,'en-US');
      await this.speak('Your options are','en-US');
@@ -85,7 +86,7 @@ export class ImageQuestionComponent implements OnInit {
       this.synthServive.stop();
       this.option = this.synthServive.text.trim();
       //this.speechSynthesizer.speakEssayPromptEn();
-      //this.checkOptionMatch(this.option.toString());
+      this.checkOptionMatch(this.option.toString());
       this.speakLang = true;
       this.speakEssay("The Anwer You have Provided is  " +this.option.toString(), 'en-US');
       // this.speechSynthesizer.speakQuestionNext();
@@ -95,11 +96,6 @@ export class ImageQuestionComponent implements OnInit {
   checkOptionMatch(option: string){
     const value = option.trim();
     let index =0;
-    // for(let i = 0; i<this.options?.length;i++){
-    //   if(this.options[i].toLowerCase().includes(value.toLowerCase())){
-    //     index = i+1;
-    //   }
-    // }
     this.selectedOption = 2;
     console.log(this.selectedOption);
   }
@@ -150,28 +146,51 @@ export class ImageQuestionComponent implements OnInit {
     switch (prompt) {
       case 'confirm':
         this.synthServive.stop();
+        this.speak('Moving to next question','en-US');
         this.routeToNext()
         break;
       case 'confirm.':
         this.synthServive.stop();
+        this.speak('Moving to next question','en-US');
         this.routeToNext()
         break;
       case 'previous.':
         this.synthServive.stop();
+        this.speak('Moving to previous question','en-US');
         this.routeToPrevious()
         break;
       case 'back.':
         this.synthServive.stop();
+        this.speak('Moving to previous question','en-US');
         this.routeToPrevious()
         break;
 
     }
   }
+
   routeToPrevious() {
-    this.router.navigate(['/question']);
+    setTimeout(async () => {
+      this.question()
+    }, 5000);
   }
+  navigateTo(url: string): void {
+    this.ngZone.run(() => {
+      this.router.navigateByUrl(url);
+    });
+  }
+  question(){
+   //this.router.navigate(['/question']);
+   this.navigateTo('/question')
+  }
+  questionNext(){
+    //this.router.navigate(['/essay']);
+    this.navigateTo('/essay')
+   }
+ 
   routeToNext() {
-    this.router.navigate(['/essay']);
+    setTimeout(async () => {
+      this.questionNext()
+    }, 5000);
   }
   ngOnDestroy() {
     this.subscription.unsubscribe()
