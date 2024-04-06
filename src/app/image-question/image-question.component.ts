@@ -14,7 +14,7 @@ export class ImageQuestionComponent implements OnInit {
   option: any;
   speechSynthesizerEssay!: SpeechSynthesisUtterance;
   subscription: Subscription = new Subscription;
-  questions = "What percentage of Indian tourist went to either USA or UK"; 
+  questions = "What total percentage of Indian tourist went to  USA and UK?"; 
   //  Option One : 'INDIA',Option two :'RUSSIA',Option three'CHINA', Option Four:  'USA'";
   options = ['40%','50%','70%','80%'];
 

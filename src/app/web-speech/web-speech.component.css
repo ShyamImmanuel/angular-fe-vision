@@ -1,97 +1,35 @@
-/* @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap");
-
-*,
-*:before,
-*:after {
-	box-sizing: border-box;
+.header{
+	.modal-container-title {
+		text-align: center;
+		margin-top: 50px;
+		font-style: arial;
+		color: #ab346d;
+	}	
 }
 
-/* Some basic CSS overrides */
-body {
-	line-height: 1.5;
-	min-height: 100vh;
-	font-family: "Outfit", sans-serif;
-	color: #2d232e;
-	background-color: #c8c0bd;
-	position: relative;
+p {
+	font-style: arial;
+	color: #ab346d;
+	font-size: medium;
 }
 
-button,
-input,
-select,
-textarea {
-	font: inherit;
-}
-
-a {
-	color: inherit;
-}
-
-/* End basic CSS override */
-
-* {
-	scrollbar-width: 0;
-}
-
-*::-webkit-scrollbar {
-	background-color: transparent;
-	width: 12px;
-}
-
-*::-webkit-scrollbar-thumb {
-	border-radius: 99px;
-	background-color: #ddd;
-	border: 4px solid #fff;
-}
-
-.modal {
+.modal-divison {
 	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: rgba(#000, 0.25);
-}
-
-.modal-container {
-	max-height: 90vh;
-	max-width: 500px;
-	margin-left: auto;
-	margin-right: auto;
-	background-color: #fff;
-	border-radius: 16px;
-	overflow: hidden;
-	display: flex;
-	flex-direction: column;
-	box-shadow: 0 15px 30px 0 rgba(#000, 0.25);
-	@media (max-width: 600px) {
-		width: 90%;
+	z-index: 15;
+	top: 25%;
+	left: 45%;
+	margin: -100px 0 0 -150px;
+    background-color: #c8e3d3;
+	h1 {
+		font-style: arial;
+		color: #ab346d;
+		font-size: x-large;
 	}
-}
-
-.modal-container-header {
-	padding: 16px 32px;
-	border-bottom: 1px solid #ddd;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
 }
 
 .modal-container-title {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	line-height: 1;
-	font-weight: 700;
-	font-size: 1.125;
-	svg {
-		width: 32px;
-		height: 32px;
-		color: #750550;
-	}
+	text-align: center;
+	margin-top: 50px;
 }
 
 .modal-container-body {
@@ -100,54 +38,69 @@ a {
 }
 
 .rtf {
+
 	h1,
 	h2,
 	h3,
 	h4,
 	h5,
 	h6 {
-		font-weight: 700;
+		font-style: arial;
+		color: #ab346d;
+		font-size: larger;
+		/* font-weight: 700; */
+		text-align: center;
 	}
 
 	h1 {
 		font-size: 1.5rem;
 		line-height: 1.125;
+		text-align: center;
 	}
 
 	h2 {
-		font-size: 1.25rem;
+		/* font-size: 1.25rem; */
 		line-height: 1.25;
+		text-align: center;
 	}
 
 	h3 {
 		font-size: 1rem;
 		line-height: 1.5;
+		text-align: center;
 	}
 
-	& > * + * {
+	&>*+* {
 		margin-top: 1em;
+		text-align: center;
+
 	}
 
-	& > * + :is(h1, h2, h3) {
+	&>*+ :is(h1, h2, h3) {
 		margin-top: 2em;
+		text-align: center;
 	}
 
-	& > :is(h1, h2, h3) + * {
+	&> :is(h1, h2, h3)+* {
 		margin-top: 0.75em;
+		text-align: center;
 	}
 
 	ul,
 	ol {
 		margin-left: 20px;
-		list-style-position: inside;
+		/* list-style-position: inside; */
+		text-align: center;
 	}
 
 	ol {
-		list-style: numeric;
+		/* list-style: numeric; */
+		text-align: center;
 	}
 
 	ul {
-		list-style: disc;
+		/* list-style: disc; */
+		text-align: center;
 	}
 }
 
@@ -159,6 +112,7 @@ a {
 	border-top: 1px solid #ddd;
 	gap: 12px;
 	position: relative;
+
 	&:after {
 		content: "";
 		display: block;
@@ -183,6 +137,7 @@ a {
 	transition: 0.15s ease;
 
 	&.is-ghost {
+
 		&:hover,
 		&:focus {
 			background-color: #dfdad7;
@@ -192,6 +147,7 @@ a {
 	&.is-primary {
 		background-color: #750550;
 		color: #fff;
+
 		&:hover,
 		&:focus {
 			background-color: #4a0433;
@@ -212,6 +168,7 @@ a {
 	cursor: pointer;
 	border-radius: 8px;
 	transition: 0.15s ease;
+
 	svg {
 		width: 24px;
 		height: 24px;
