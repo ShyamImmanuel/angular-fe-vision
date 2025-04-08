@@ -18,10 +18,10 @@ import noisereduce as nr
 # from pydub import AudioSegment
 # from pydub.playback import play
 
-client = OpenAI(api_key="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")
+# client = OpenAI(api_key="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")
 
 app = Flask(__name__)
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+# app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
 questions = [
