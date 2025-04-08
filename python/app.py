@@ -4,10 +4,8 @@ import time
 from openai import OpenAI
 import base64
 import speech_recognition as sr
-# client = OpenAI(api_key="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")
 
 app = Flask(__name__)
-# app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 questions = [
     ("What is the capital of France?", [], 'paris', None),  # New short answer question 
