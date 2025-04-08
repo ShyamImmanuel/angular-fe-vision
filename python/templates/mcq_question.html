@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Question</title>
+</head>
+<body>
+    <h1>Question {{ question_number }}</h1>
+    <p>{{ question_text }}</p>
+    
+    <form id="mcqForm" method="post">
+        {% for option in options %}
+            <input type="radio" name="user_answer" value="{{ option }}"> {{ option }}<br>
+        {% endfor %}
+        <button type="submit">Submit Answer</button>
+    </form>
+
+    <div id="recordingControls">
+        <button id="startRecordingButton" onclick="startRecording()">Start Recording</button>
+        <button id="stopRecordingButton" style="display: none;" onclick="stopRecording()">Stop Recording</button>
+        <div id="recordingStatus" style="display: none;">Recording...</div>
+        <button id="playRecordingButton" style="display: none;" onclick="playRecording()">Play Recording</button>
+    </div>
+
+    <form id="audioForm" method="post" style="display: none;">
+        <input type="hidden" id="audioFilePath" name="audioFilePath" value="">
+        <button type="button" onclick="submitForm()">Submit Answer with Recording</button>
+    </form>
+
+    <script>
+        let recorder;
+        let audioChunks = [];
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    recorder = new MediaRecorder(stream);
+                    recorder.ondataavailable = e => {
+                        audioChunks.push(e.data);
+                    };
+                    recorder.onstop = () => {
+                        let audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        let audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById('audioFilePath').value = audioUrl;
+                        document.getElementById('recordingStatus').style.display = 'none';
+                        document.getElementById('playRecordingButton').style.display = 'inline-block';
+                        document.getElementById('mcqForm').style.display = 'none';
+                        document.getElementById('audioForm').style.display = 'block';
+                    };
+                    document.getElementById('startRecordingButton').style.display = 'none';
+                    document.getElementById('stopRecordingButton').style.display = 'inline-block';
+                    document.getElementById('recordingStatus').style.display = 'inline-block';
+                    recorder.start();
+                })
+                .catch(console.error);
+        }
+
+        function stopRecording() {
+            recorder.stop();
+        }
+
+        function playRecording() {
+            let audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            let audioUrl = URL.createObjectURL(audioBlob);
+            let audio = new Audio(audioUrl);
+            audio.play();
+        }
+
+        function submitForm() {
+            document.getElementById('audioForm').submit();
+        }
+    </script>
+</body>
+</html>

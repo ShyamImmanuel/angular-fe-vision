@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question</title>
+    <style>
+        .recording-status {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Question {{ question_number }}</h1>
+    <p>{{ question_text }}</p>
+    <form method="post">
+        <!-- Render appropriate form fields for MCQ or short answer question -->
+        <!-- Include recording controls here as well -->
+    </form>
+
+    <div id="recordingControls">
+        <button id="startRecordingButton" onclick="startRecording()">Start Recording</button>
+        <div id="recordingStatus" class="recording-status">Recording...</div>
+        <button id="playRecordingButton" class="recording-status" onclick="playRecording()">Play Recording</button>
+    </div>
+
+    <form id="submitForm" method="post" style="display: none;">
+        <input type="hidden" id="audioFilePath" name="audioFilePath" value="">
+        <button type="button" onclick="submitForm()">Submit Answer with Recording</button>
+    </form>
+
+    <script>
+        let recorder;
+        let audioChunks = [];
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    recorder = new MediaRecorder(stream);
+                    recorder.ondataavailable = e => {
+                        audioChunks.push(e.data);
+                    };
+                    recorder.onstop = () => {
+                        let audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        let audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById('audioFilePath').value = audioUrl;
+                        document.getElementById('recordingStatus').style.display = 'none';
+                        document.getElementById('playRecordingButton').style.display = 'inline-block';
+                    };
+                    document.getElementById('startRecordingButton').style.display = 'none';
+                    document.getElementById('recordingStatus').style.display = 'inline-block';
+                    recorder.start();
+                })
+                .catch(console.error);
+        }
+
+        function playRecording() {
+            let audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            let audioUrl = URL.createObjectURL(audioBlob);
+            let audio = new Audio(audioUrl);
+            audio.play();
+        }
+
+        function stopRecording() {
+            recorder.stop();
+        }
+
+        function submitForm() {
+            document.getElementById('submitForm').submit();
+        }
+    </script>
+</body>
+</html>
